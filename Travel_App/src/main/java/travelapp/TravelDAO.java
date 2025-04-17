@@ -30,8 +30,8 @@ public class TravelDAO {
         try {
             String lineAll = "select no, district, title, description, address, phone from travel limit ?,?";
             pstmt = conn.prepareStatement(lineAll);
-            pstmt.setInt(1, Integer.parseInt(num)*20-20);
-            pstmt.setInt(2, 20);
+            pstmt.setInt(1, Integer.parseInt(num)*10-10);
+            pstmt.setInt(2, 10);
             rs = pstmt.executeQuery();
 
             while(rs.next()) {
@@ -88,7 +88,7 @@ public class TravelDAO {
     public ArrayList<TravelVO> search(String num) {
         ArrayList<TravelVO> listsSearch = new ArrayList<>();
         try {
-            String lineSearch = "select no, district, title, description, address, phone from travel where district or title or description or address like ?";
+            String lineSearch = "select no, district, title, description, address, phone from travel where concat(district, title, description, address) like ?";
             pstmt = conn.prepareStatement(lineSearch);
             pstmt.setString(1, "%" + num + "%");
             rs = pstmt.executeQuery();

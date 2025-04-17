@@ -11,19 +11,29 @@ public class TravelApp {
             String num = sc.nextLine();
             if (num.equals("1")) {
                 while (true) {
-                    System.out.print("페이지 입력 (이전으로 돌아가고 싶다면 quit): ");
+                    System.out.print("페이지 입력 (1,2,3... / 이전으로 돌아가고 싶다면 quit): ");
                     num = sc.nextLine();
                     if (num.equals("quit")) {
                         System.out.println("이전페이지로 돌아갑니다.");
                         break;
                     }
-                    System.out.println(num + " 페이지");
-                    TravelService travelAll = new TravelService();
-                    ArrayList<TravelVO> listsAll = travelAll.searchAll(num);
-                    for (TravelVO travel : listsAll) {
-                        System.out.println((String.format("번호 [%s]\t지역 : %s\t 제목 : %s\n%s\n주소 : %s\n전화번호 : %s",
-                                travel.getNo(), travel.getDistrict(), travel.getTitle(), travel.getDescription(),
-                                travel.getAddress(), travel.getPhone())));
+                    for(int i = 0; i<num.length(); i++) {
+                        char tmp;
+                        tmp = num.charAt(i);
+                        if(Character.isDigit(tmp)) {
+                            System.out.println(num + " 페이지");
+                            TravelService travelAll = new TravelService();
+                            ArrayList<TravelVO> listsAll = travelAll.searchAll(num);
+                            for (TravelVO travel : listsAll) {
+                                System.out.println((String.format("번호 [%s]\t지역 : %s\t 제목 : %s\n%s\n주소 : %s\n전화번호 : %s",
+                                        travel.getNo(), travel.getDistrict(), travel.getTitle(), travel.getDescription(),
+                                        travel.getAddress(), travel.getPhone())));
+
+                            }
+                        }else{
+                            System.out.println("잘못된 입력입니다.");
+                            continue;
+                        }
                     }
                 }
             }
@@ -64,8 +74,7 @@ public class TravelApp {
                 }
             }
             if(num.equals("quit")) {
-                System.out.print("번호를 입력하세요 (1 : 전체보기 / 2 : 구역 검색 / 3 : 키워드 검색 / exit : 종료) : ");
-                num = sc.nextLine();
+               continue;
             }
             if (num.equals("exit")) {
                 System.out.println("종료");

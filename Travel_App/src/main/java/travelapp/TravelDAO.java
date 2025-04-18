@@ -1,117 +1,147 @@
 package travelapp;
 
+import com.opencsv.CSVReader;
+import com.opencsv.CSVReaderBuilder;
+
+import java.io.FileReader;
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Scanner;
 
 public class TravelDAO {
-    Connection conn = null;
+    // Travel 테이블에 대한 CRUD를 제공하는 DAO 클래스
+
+    private Connection conn;
     PreparedStatement pstmt = null;
     ResultSet rs = null;
 
-    String url = "jdbc:mysql://localhost:3306/travel_db";
-    String user = "root";
-    String password = "!123456";
-
-
-
     public TravelDAO() {
+        String url = "jdbc:mysql://localhost:3306/travel_db";
+        String user = "root";
+        String password = "!123456";
+
         try {
             Class.forName("com.mysql.cj.jdbc.Driver");
             this.conn = DriverManager.getConnection(url, user, password);
-
         } catch (ClassNotFoundException e) {
-            throw new RuntimeException(e);
+            System.out.println("[에러] " + e.getMessage());
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            System.out.println("[에러] " + e.getMessage());
         }
+
     }
-    public ArrayList<TravelVO> searchAll(String num) {
-        ArrayList<TravelVO> listAll = new ArrayList<>();
+
+    public ArrayList<TravelVO> findAll() {
+        // 전체 목록을 페이지 별로 보여주기
+
+        ArrayList<TravelVO> lists = new ArrayList<>();
+
         try {
-            String lineAll = "select no, district, title, description, address, phone from travel limit ?,?";
-            pstmt = conn.prepareStatement(lineAll);
-            pstmt.setInt(1, Integer.parseInt(num)*10-10);
-            pstmt.setInt(2, 10);
+            String sql = "select no, district, title, description, address, phone from travel";
+            pstmt = this.conn.prepareStatement( sql );
+
             rs = pstmt.executeQuery();
 
-            while(rs.next()) {
-                TravelVO vo = new TravelVO();
-                vo.setNo(rs.getString("no"));
-                vo.setDistrict(rs.getString("district"));
-                vo.setTitle(rs.getString("title"));
-                vo.setDescription(rs.getString("description"));
-                vo.setAddress(rs.getString("address"));
-                vo.setPhone(rs.getString("phone"));
+            while( rs.next() ) {
 
-                listAll.add(vo);
+                TravelVO travel = new TravelVO(
+                        rs.getString( "no" ),
+                        rs.getString( "district" ),
+                        rs.getString( "title" ),
+                        rs.getString( "description" ),
+                        rs.getString( "address" ),
+                        rs.getString( "phone" )
+                );
+
+                lists.add(travel);
+
+                /*
+                if(Integer.parseInt( rs.getString("no") ) % 10 == 0 ) {
+                    System.out.println("no : " + Integer.parseInt( rs.getString("no") ));
+                }
+                */
+
             }
         } catch (SQLException e) {
-            System.out.println("Error: " + e.getMessage());
+            System.out.println( "[에러] " + e.getMessage() );
         } finally {
-            if (rs != null) try { rs.close(); } catch (SQLException e) { e.printStackTrace(); }
-            if (pstmt != null) try { pstmt.close(); } catch (SQLException e) { e.printStackTrace(); }
-            if (conn != null) try { conn.close(); } catch (SQLException e) { e.printStackTrace(); }
+            if( pstmt != null ) try { pstmt.close(); } catch (SQLException e) {  }
+            if( rs != null ) try { rs.close(); } catch (SQLException e) { }
         }
 
-        return listAll;
+        return lists;
     }
-    public ArrayList<TravelVO> searchDistrict(String num) {
-        ArrayList<TravelVO> listsDistrict = new ArrayList<>();
+
+    public ArrayList<TravelVO> findRegion(String region) {
+        // 권역별 관광지 목록 보여주기
+
+        ArrayList<TravelVO> lists = new ArrayList<>();
+
         try {
-            String lineDistrict = "select no, district, title, description, address, phone from travel where district like ?";
-            conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/travel_db", "root", "!123456");
-            pstmt = conn.prepareStatement(lineDistrict);
-            pstmt.setString(1, "%"+num+"%");
+            String sql = "select no, district, title, description, address, phone from travel where district like ?";
+            pstmt = this.conn.prepareStatement(sql);
+
+            pstmt.setString(1, region + "%" );
+
             rs = pstmt.executeQuery();
 
-            while(rs.next()) {
-                TravelVO vo = new TravelVO();
-                vo.setNo(rs.getString("no"));
-                vo.setDistrict(rs.getString("district"));
-                vo.setTitle(rs.getString("title"));
-                vo.setDescription(rs.getString("description"));
-                vo.setAddress(rs.getString("address"));
-                vo.setPhone(rs.getString("phone"));
-                listsDistrict.add(vo);
+            while (rs.next()) {
+                TravelVO travel = new TravelVO(
+                        rs.getString("no"),
+                        rs.getString("district"),
+                        rs.getString("title"),
+                        rs.getString("description"),
+                        rs.getString("address"),
+                        rs.getString("phone")
+                );
+
+                lists.add(travel);
+            }
+        } catch (SQLException e) {
+            System.out.println( "[에러] " + e.getMessage() );
+        } finally {
+            if( pstmt != null ) try { pstmt.close(); } catch (SQLException e) {}
+            if( rs != null ) try { rs.close(); } catch (SQLException e) {}
+        }
+
+        return lists;
+    }
+
+    public ArrayList<TravelVO> findSearch(String keyword) {
+        // 검색 결과를 목록으로 보여주기
+
+        ArrayList<TravelVO> lists = new ArrayList<>();
+
+        try {
+            String sql = "select no, district, title, description, address, phone from travel where district like ? or title like ? or description like ? or address like ? ";
+            pstmt = this.conn.prepareStatement( sql );
+
+            for ( int i = 1; i <= 4; i++ ) {
+                pstmt.setString(i, "%" + keyword + "%");
             }
 
-
-        } catch (SQLException e) {
-            System.out.println("Error: " + e.getMessage());
-        } finally {
-            if (rs != null) try { rs.close(); } catch (SQLException e) { e.printStackTrace(); }
-            if (pstmt != null) try { pstmt.close(); } catch (SQLException e) { e.printStackTrace(); }
-            if (conn != null) try { conn.close(); } catch (SQLException e) { e.printStackTrace(); }
-        }
-        return listsDistrict;
-    }
-    public ArrayList<TravelVO> search(String num) {
-        ArrayList<TravelVO> listsSearch = new ArrayList<>();
-        try {
-            String lineSearch = "select no, district, title, description, address, phone from travel where concat(district, title, description, address) like ?";
-            pstmt = conn.prepareStatement(lineSearch);
-            pstmt.setString(1, "%" + num + "%");
             rs = pstmt.executeQuery();
 
-            while(rs.next()) {
-                TravelVO vo = new TravelVO();
-                vo.setNo(rs.getString("no"));
-                vo.setDistrict(rs.getString("district"));
-                vo.setTitle(rs.getString("title"));
-                vo.setDescription(rs.getString("description"));
-                vo.setAddress(rs.getString("address"));
-                vo.setPhone(rs.getString("phone"));
-                listsSearch.add(vo);
+            while (rs.next()) {
+                TravelVO travel = new TravelVO(
+                        rs.getString("no"),
+                        rs.getString("district"),
+                        rs.getString("title"),
+                        rs.getString("description"),
+                        rs.getString("address"),
+                        rs.getString("phone")
+                );
+                lists.add(travel);
             }
-
-
         } catch (SQLException e) {
-            System.out.println("Error: " + e.getMessage());
+            System.out.println( "[에러] " + e.getMessage() );
         } finally {
-            if (rs != null) try { rs.close(); } catch (SQLException e) { e.printStackTrace(); }
-            if (pstmt != null) try { pstmt.close(); } catch (SQLException e) { e.printStackTrace(); }
-            if (conn != null) try { conn.close(); } catch (SQLException e) { e.printStackTrace(); }
+            if( pstmt != null ) try { pstmt.close(); } catch (SQLException e) { }
+            if( rs != null ) try { rs.close(); } catch (SQLException e) { }
         }
-        return listsSearch;
+
+        return lists;
+
     }
 }

@@ -1,6 +1,19 @@
 package travelapp;
 
 public class TravelVO {
+    // Travel 테이블에 대한 VO 클래스
+
+    /*
+
+    - 순번 : no
+    - 지역 : district
+    - 제목 : title
+    - 설명 : description
+    - 주소 : address
+    - 전화번호 : phone
+
+     */
+
     private String no;
     private String district;
     private String title;
@@ -8,63 +21,38 @@ public class TravelVO {
     private String address;
     private String phone;
 
-    public String getNo() {
-        return no;
+    public TravelVO(String no, String district, String title, String description, String address, String phone) {
+        this.no = no;
+        this.district = district;
+        this.title = title;
+        this.description = description;
+        this.address = address;
+        this.phone = phone;
     }
 
-    public void setNo(String no) {
-        this.no = no;
+    public String getNo() {
+        return no;
     }
 
     public String getDistrict() {
         return district;
     }
 
-    public void setDistrict(String district) {
-        this.district = district;
-    }
-
     public String getTitle() {
         return title;
-    }
-
-    public void setTitle(String title) {
-        this.title = title;
     }
 
     public String getDescription() {
         return description;
     }
 
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
     public String getAddress() {
         return address;
-    }
-
-    public void setAddress(String address) {
-        this.address = address;
     }
 
     public String getPhone() {
         return phone;
     }
 
-    public void setPhone(String phone) {
-        this.phone = phone;
-    }
-
-    @Override
-    public String toString() {
-        return "TravelVO{" +
-                "no='" + no + '\'' +
-                ", district='" + district + '\'' +
-                ", title='" + title + '\'' +
-                ", description='" + description + '\'' +
-                ", address='" + address + '\'' +
-                ", phone='" + phone + '\'' +
-                '}';
-    }
 }
+

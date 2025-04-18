@@ -5,84 +5,107 @@ import java.util.Scanner;
 
 public class TravelApp {
     public static void main(String[] args) {
-        Scanner sc = new Scanner(System.in);
-        while (true) {
-            System.out.print("번호를 입력하세요 (1 : 전체보기 / 2 : 구역 검색 / 3 : 키워드 검색 / exit : 종료) : ");
-            String num = sc.nextLine();
-            if (num.equals("1")) {
-                while (true) {
-                    System.out.print("페이지 입력 (1,2,3... / 이전으로 돌아가고 싶다면 quit): ");
-                    num = sc.nextLine();
-                    if (num.equals("quit")) {
-                        System.out.println("이전페이지로 돌아갑니다.");
-                        break;
-                    }
-                    for(int i = 0; i<num.length(); i++) {
-                        char tmp;
-                        tmp = num.charAt(i);
-                        if(Character.isDigit(tmp)) {
-                            System.out.println(num + " 페이지");
-                            TravelService travelAll = new TravelService();
-                            ArrayList<TravelVO> listsAll = travelAll.searchAll(num);
-                            for (TravelVO travel : listsAll) {
-                                System.out.println((String.format("번호 [%s]\t지역 : %s\t 제목 : %s\n%s\n주소 : %s\n전화번호 : %s",
-                                        travel.getNo(), travel.getDistrict(), travel.getTitle(), travel.getDescription(),
-                                        travel.getAddress(), travel.getPhone())));
+        // Travel 애플리케이션 클래스
 
-                            }
-                        }else{
-                            System.out.println("잘못된 입력입니다.");
-                            continue;
+        TravelService travelService = new TravelService();
+
+        Scanner sc = new Scanner( System.in );
+
+        String menuInput = null;
+
+        whileLoop:
+        while ( true ) {
+            System.out.println("========================================================================");
+            System.out.println();
+            System.out.println( "1. 전체 목록" );
+            System.out.println( "2. 권역별 관광지 목록" );
+            System.out.println( "3. 검색 결과 목록" );
+            System.out.println();
+            System.out.println( "4. 종료" );
+            System.out.println();
+            System.out.println("========================================================================");
+            System.out.println();
+
+            System.out.print( "번호 입력 : " );
+
+            menuInput = sc.nextLine();
+
+            switch( menuInput ) {
+                case "1":
+
+                    System.out.print( "페이지( 10개의 데이터씩 ) : " );
+                    String strPage = sc.nextLine();
+                    try {
+                        int page = Integer.parseInt( strPage.trim() );
+
+                        ArrayList<TravelVO> travelList = travelService.TravelPage( page );
+                        for ( TravelVO travel : travelList ) {
+
+                            String data = String.format( "%s %s %s %s %s %s"
+                                    , travel.getNo(), travel.getDistrict(), travel.getTitle()
+                                    , travel.getDescription(), travel.getAddress(), travel.getPhone()
+                            );
+                            System.out.println( data );
+
                         }
+                    } catch (NumberFormatException e) {
+                        System.out.println( "정수 값을 입력하세요." );
                     }
-                }
-            }
-            if (num.equals("2")) {
-                while (true) {
-                    System.out.print("구역 검색 (수도, 충청, 전라, 경상, 강원, 제주 // quit) : ");
-                    num = sc.nextLine();
-                    if (num.equals("quit")) {
-                        System.out.println("이전페이지로 돌아갑니다.");
-                        break;
+
+                    break;
+
+                case "2":
+
+                    System.out.print( "권역 이름 (수도권, 강원권, 충청권, 전라권, 경상권, 제주권) : " );
+                    String name = sc.nextLine();
+                    ArrayList<TravelVO> region = travelService.TravelDistrict( name );
+
+                    for ( TravelVO travel : region ) {
+                        String data = String.format( "%s %s %s %s %s %s"
+                                , travel.getNo(), travel.getDistrict(), travel.getTitle()
+                                , travel.getDescription(), travel.getAddress(), travel.getPhone()
+                        );
+                        System.out.println( data );
                     }
-                    System.out.println(num + " 관광지");
-                    TravelService travelDistrict = new TravelService();
-                    ArrayList<TravelVO> listsDistrict = travelDistrict.searchDistrict(num);
-                    for (TravelVO travelD : listsDistrict) {
-                        System.out.println((String.format("번호 [%s]\t지역 : %s\t 제목 : %s\n%s\n주소 : %s\n전화번호 : %s",
-                                travelD.getNo(), travelD.getDistrict(), travelD.getTitle(), travelD.getDescription(),
-                                travelD.getAddress(), travelD.getPhone())));
+
+                    System.out.println();
+                    break;
+
+                case "3":
+                    System.out.println();
+
+                    System.out.print(" 검색할 내용 : ");
+                    String msg = sc.nextLine();
+                    ArrayList<TravelVO> keyword = travelService.TravelSearch( msg );
+                    // travelList = travelDao.TravelSearch( search );
+
+                    for ( TravelVO travel : keyword ) {
+                        String data = String.format( "%s %s %s %s %s %s"
+                                , travel.getNo(), travel.getDistrict(), travel.getTitle()
+                                , travel.getDescription(), travel.getAddress(), travel.getPhone()
+                        );
+                        System.out.println( data );
                     }
-                }
-            }
-            if (num.equals("3")) {
-                while (true) {
-                    System.out.print("키워드를 입력해주세요 // quit) : ");
-                    num = sc.nextLine();
-                    if (num.equals("quit")) {
-                        System.out.println("이전페이지로 돌아갑니다.");
-                        break;
-                    }
-                    System.out.println(num + " 을 포함한 검색 결과");
-                    TravelService travelSearch = new TravelService();
-                    ArrayList<TravelVO> listsSearch = travelSearch.search(num);
-                    for (TravelVO travelS : listsSearch) {
-                        System.out.println((String.format("번호 [%s]\t지역 : %s\t 제목 : %s\n%s\n주소 : %s\n전화번호 : %s",
-                                travelS.getNo(), travelS.getDistrict(), travelS.getTitle(), travelS.getDescription(),
-                                travelS.getAddress(), travelS.getPhone())));
-                    }
-                }
-            }
-            if(num.equals("quit")) {
-               continue;
-            }
-            if (num.equals("exit")) {
-                System.out.println("종료");
-                System.exit(0);
-            }
-            else {
-                System.out.println("올바른 키워드를 입력하세요.");
+
+                    System.out.println();
+                    break;
+
+                case "4":
+                    sc.close();
+                    break whileLoop;
+
+                default:
+                    System.out.println();
+                    System.out.println( "잘못된 값을 입력하셨습니다." );
+                    System.out.println( "입력은 1~3, 4 을 입력해주세요." );
+                    System.out.println();
+                    break;
             }
         }
+        System.out.println();
+        System.out.println( "시스템을 종료합니다." );
+        System.out.println();
+
     }
 }
+
